@@ -6,7 +6,7 @@ use serenity::{
         Ready,
         Context,
         Interaction,
-        GuildId
+        Guild
     }, 
     async_trait
 };
@@ -17,23 +17,32 @@ struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn ready(&self, ctx: Context, _ready: Ready) {
+    async fn ready(&self, _ctx: Context, _ready: Ready) {
         println!("Defender has been activated!");
+    }
 
-        let guild_id = GuildId::new(
-            dotenv::var("GUILD_ID")
-            .unwrap()
-            .parse::<u64>()
-            .expect("Guild ID is not an integer")
-        );
+    async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+        if let Interaction::Command(cmd) = interaction {
+            // TODO: Add cmd_run_branch! macro that automatically expands to an arm like in here
+            match cmd.data.name.as_str() {
+                "ping" => {
+                    commands::ping::run(&ctx, &cmd).await;
+                }
+                _ => {}
+            }
+        }
+    }
 
-        let commands = guild_id.set_commands(
+    async fn guild_create(&self, ctx: Context, guild: Guild, _is_new: Option<bool>) {
+        println!("'{}': {}", guild.name, guild.id);
+
+        let commands = guild.id.set_commands(
             &ctx.http,
             vec![
-                commands::ping::register()
+                commands::ping::register(),
             ]
         ).await
-        .unwrap();
+        .expect("Couldn't register commands into guild."); // TODO: Maybe not panic?
 
         println!(
             "The following commands have been registed:\n{}",
@@ -43,17 +52,6 @@ impl EventHandler for Handler {
                 .collect::<Vec<String>>()
                 .join("\n")
         );
-    }
-
-    async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-        if let Interaction::Command(cmd) = interaction {
-            match cmd.data.name.as_str() {
-                "ping" => {
-                    commands::ping::run(&ctx, &cmd).await
-                }
-                _ => {}
-            }
-        }
     }
 }
 
