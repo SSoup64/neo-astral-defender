@@ -1,13 +1,9 @@
 use serenity::all::{
-    Context,
-    CommandInteraction,
-    CreateCommand,
-    CreateInteractionResponseFollowup
+    CommandInteraction, Context, CreateCommand, CreateInteractionResponseFollowup,
 };
 
 pub fn register() -> CreateCommand {
-    CreateCommand::new("ping")
-    .description("make sure the bot is alive")
+    CreateCommand::new("ping").description("make sure the bot is alive")
 }
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) {

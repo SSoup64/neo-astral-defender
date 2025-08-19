@@ -1,14 +1,6 @@
-use serenity::{ 
-    all::{ 
-        ClientBuilder,
-        EventHandler,
-        GatewayIntents,
-        Ready,
-        Context,
-        Interaction,
-        Guild
-    }, 
-    async_trait
+use serenity::{
+    all::{ClientBuilder, Context, EventHandler, GatewayIntents, Guild, Interaction, Ready},
+    async_trait,
 };
 
 mod commands;
@@ -36,13 +28,11 @@ impl EventHandler for Handler {
     async fn guild_create(&self, ctx: Context, guild: Guild, _is_new: Option<bool>) {
         println!("'{}': {}", guild.name, guild.id);
 
-        let commands = guild.id.set_commands(
-            &ctx.http,
-            vec![
-                commands::ping::register(),
-            ]
-        ).await
-        .expect("Couldn't register commands into guild."); // TODO: Maybe not panic?
+        let commands = guild
+            .id
+            .set_commands(&ctx.http, vec![commands::ping::register()])
+            .await
+            .expect("Couldn't register commands into guild."); // TODO: Maybe not panic?
 
         println!(
             "The following commands have been registed:\n{}",
